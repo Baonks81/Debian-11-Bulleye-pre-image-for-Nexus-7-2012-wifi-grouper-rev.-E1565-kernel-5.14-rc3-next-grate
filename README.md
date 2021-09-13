@@ -1,7 +1,16 @@
-# Debian-11-Bulleye-pre-image-for-Nexus-7-2012-wifi-grouper-rev.-E1565-kernel-5.14-rc3-next-grate
-Linux on Nexus 7 2012
+# Debian-Mobian Bookworm F2FS Nexus 7 2012 wifi rev. E1565 kernel 5.14-rc3-next-grate
 
 Link trên Google drive:
+
+Default user was debian, default passwd was 123456
+
+Debian Mobian Bookworm f2fs rootfs
+
+https://drive.google.com/drive/folders/1PgR3LVJa7UyHzY9PA_xc6XeCYpSkhLEI?usp=sharing
+
+
+
+Debian Bulleye pre-image:
 
 https://drive.google.com/drive/mobile/folders/1jhq1v5ejOazDB1wSF-ZS0FxBc_QIPUFD/1BL_ZPgsDuYTu5EXl0vXK6uyIeGmW5FbW?sort=13&direction=a
 
@@ -55,15 +64,15 @@ TWRP (adb shell) $ find /sys/devices/ | grep -c tps6591 && echo You have PM269
 
 
 
-$ sudo adb start-server
+# sudo adb start-server
 
 
 
-$ sudo adb reboot bootloader
+# sudo adb reboot bootloader
 
 
 
-$ sudo fastboot flash boot <boot_filename>.img
+# sudo fastboot flash boot <boot_filename>.img
 
 
 
@@ -85,7 +94,7 @@ On PC/Laptop terminal:
 
 
 
-$ adb push <rootfs_filename>.img /dev/block/mmcblk0p__  <- fill partition number
+# adb push <rootfs_filename>.img /dev/block/mmcblk0p__  <- fill partition number
 
 
 
@@ -132,6 +141,82 @@ Is the information correct? [Y/n] y
 
 
 
+***Tạo wpa.conf cho kết nối wifi bang wpa_passphrase/wpa_supplicant
+
+
+
+# su -
+
+
+
+# sudo wpa_passphrase [your_ssid_name] [your_router_passwd] > wpa.conf
+
+
+
+Loading wpa.conf vào wpa_supplicant và ping thử google.com
+
+
+
+# sudo wpa_supplicant -B -i wlan0 -c wpa.conf
+
+
+
+# sudo dhclient wlan0
+
+
+
+# sudo ping -c 3 google.com
+
+
+
+***Tạo kết nối wifi bang iwd daemon
+
+
+
+# sudo apt install iwd
+
+
+
+# sudo systemctl enable iwd.service
+
+
+
+# sudo systemctl start iwd.service
+
+
+
+# sudo iwdctl
+
+
+
+[iwd]# device list
+
+
+
+[iwd]# station wlan0 scan
+
+
+
+[iwd]# station wlan0 get-networks
+
+
+
+[iwd]# station wlan0 connect [your_ssid] [your_router_passwd]
+
+
+
+[iwd]# exit
+
+
+
+# sudo ip a
+
+
+
+# sudo ping -c 3 google.com
+
+
+
 Cài đặt sudo
 
 
@@ -174,31 +259,7 @@ Thêm <username> vào groups sudoers
 
 
 
-Tạo wpa.conf cho kết nối wifi
-
-
-
-# su -
-
-
-
-# sudo wpa_passphrase [your_ssid_name] [your_router_passwd] > wpa.conf
-
-
-
-Loading wpa.conf vào wpa_supplicant và ping thử google.com
-
-
-
-# sudo wpa_supplicant -B -i wlan0 -c wpa.conf
-
-
-
-# sudo dhclient wlan0
-
-
-
-# sudo ping -c 3 google.com
+Update repository
 
 
 
@@ -210,11 +271,19 @@ Loading wpa.conf vào wpa_supplicant và ping thử google.com
 
 
 
-# sudo apt-get install phoc phosh
+Cài DE như Lubuntu, Xubuntu, Kubuntu, MATE, GNOME, Phosh, Budgie, Cinamon, Elementary, v.v...
 
 
 
-https://github.com/agx/phosh
+Testing Phoc/Phosh Gnome-shell
+
+
+
+# sudo apt-get install phoc phosh phosh-tablet
+
+
+
+https://gitlab.gnome.org/World/Phosh/phosh
 
  Phosh mặc định khởi động vào user id 1000, nên tạo login cho <username>/passwd(bằng số 0-9) đã tạo trước đó
 
@@ -228,7 +297,7 @@ User=<username>
 
 
 
-Cài thêm gnome-control-center, network-manager, bluez, nautilus, firefox, chromium, gnome-terminal, gnome-software, gnome-maps, gnome-weather v.v….
+Cài thêm preload, tlp, tlp-rdw, phosh-tablet, gnome-control-center, network-manager, bluez, nautilus, firefox, chromium, gnome-terminal, gnome-calculator, gnome-clock, gnome-maps, gnome-weather v.v….
 
 
 
@@ -246,4 +315,276 @@ https://linmob.net/pinephone-setup-scaling-in-phosh/
 
 
 
+Disable systemd service load failed
+
+
+
+# sudo systemctl --failed
+
+
+
+# sudo systemctl disable networking
+
+
+
+# sudo systemctl disable rpi-reconfigure-raspi-firmware
+
+
+
+# sudo systemctl disable rpi-set-sysconf
+
+
+
+Bypass emergency shell/emergency mod
+
+
+
+# sudo systemctl mask emergency.service
+
+
+
+# sudo systemctl mask emergency.target
+
+
+
+Edit phoc run with xwayland như trang web này nói
+
+https://wayland.freedesktop.org/xserver.html
+
+
+
+Cứ xem phoc như weston, edit như sau:
+
+
+
+# sudo su -
+
+
+
+# sudo nano /usr/share/phosh/phoc.ini
+
+
+
+[core]
+
+xwayland = true
+
+
+
+[xwayland]
+
+path = /usr/bin/Xwayland
+
+
+
+[output:LVDS-1]
+
+modeline = 68.00    800 824 848 880    1280 1285 1286 1318 -hsync +vsync
+
+mode = 800x1280
+
+scale = 1  ← ( 1 or 2 was better than 1.25 - 1.5 - 1.75, because of no gpu accelerate)
+
+
+
+# sudo cp /user/share/phosh/phoc.ini /etc/phosh
+
+
+
 Voila! Enjoy Gnome-shell Phosh Mobile ;)
+
+
+
+https://source.puri.sm/Librem5/community-wiki/-/wikis/Tips-&-Tricks#setting-a-custom-background-in-phosh
+
+
+
+https://puri.sm/posts/easy-librem-5-app-development-scale-the-screen/
+
+
+
+https://stealthgun.tweakblogs.net/blog/19368/gentoo-on-a-pinephone-making-it-a-usable-phone
+
+
+
+Today, I'll show you upgrading to Debian/Mobian bookworm to get latest version of packages
+
+
+
+https://blog.mobian-project.org/posts/2021/03/15/unstable-distro/
+
+
+
+https://blog.mobian-project.org/posts/2021/05/17/update-2021-05-17/
+
+
+
+Get GPG to connect mobian packages:
+
+
+
+# sudo gpg --keyserver keyserver.ubuntu.com --search-keys admin@mobian-project.org
+
+
+
+# sudo gpg --keyserver keyserver.ubuntu.com --search-keys 951D61F2BC232697
+
+
+
+# sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 393F924A855FB27D
+
+
+
+Create new mobian.list and extrepo_mobian.sources
+
+
+
+# sudo nano /etc/apt/sources.list.d/mobian.list
+
+
+
+deb http://repo.mobian-project.org/ bookworm main non-free
+
+
+
+# sudo nano /etc/apt/sources.list.d/extrepo_mobian.sources
+
+
+
+Types: deb deb-src
+
+Architectures: amd64 arm64 armhf
+
+Uris: http://repo.mobian-project.org/
+
+Suites: bookworm
+
+Components: main non-free
+
+Signed-By: /var/lib/extrepo/keys/mobian.asc
+
+
+
+# sudo nano /etc/apt/sources.list
+
+
+
+deb http://deb.debian.org/debian bookworm main contrib non-free
+
+deb http://security.debian.org/debian-security bookworm-security main contrib non-free
+
+deb http://deb.debian.org/debian bookworm-backports main contrib non-free
+
+deb http://deb.debian.org/debian bookworm-updates main contrib non-free
+
+
+
+# sudo apt update && sudo apt upgrade -y
+
+
+
+# sudo apt autoclean 0
+
+
+
+Voila! Enjoy Gnome-shell Phosh Mobile on Debian/Mobian bookworm ;)
+
+
+
+Control cpufreq, vm, kernel parameters
+
+
+
+# sudo nano /etc/sysctl.conf
+
+
+
+vm.swappiness=15
+
+vm.vfs_cache_pressure=80
+
+
+
+# sudo sysctl -p
+
+# sudo chmod +x /opt/cpufreq.start
+
+# sudo chmod +x /opt/temp_throttle
+
+
+
+# sudo visudo
+
+
+
+ALL ALL=(ALL) NOPASSWD: /opt/cpufreq.start, /opt/temp_throttle
+
+
+
+In foreach command create one .desktop at /home/<username>/.config/autostart/
+
+
+
+1. sudo /opt/cpufreq.start
+
+
+
+2. sudo /opt/temp_throttle 58 <- this is important, because over 60 degrees, n7 will poweroff
+
+
+
+mobile-config-firefox
+
+
+
+# git clone https://gitlab.com/postmarketOS/mobile-config-firefox.git
+
+
+
+# sudo make install
+
+
+
+***Backup full filesystem boot and rootfs
+
+
+
+Connect Nexus 7 to PC/Laptop using micro-usb cable, enter TWRP recovery mode → Advance → Terminal
+
+
+
+# df
+
+
+
+On PC/Laptop
+
+
+
+# adb start-server
+
+
+
+Backup boot: # sudo adb pull /dev/block/mmcblk0p2 /path/to/boot-kernel-5.14-rc3-next-grate.img
+
+
+
+Backup rootfs for grouper(wifi): # sudo adb pull /dev/block/mmcblk0p9 /path/to/rootfs.img
+
+
+
+Backup rootfs for tilapia(3G): # sudo adb pull /dev/block/mmcblk0p10 /path/to/rootfs.img
+
+
+
+Backup full: sudo adb pull /dev/block/mmcblk0 /path/to/full_backup_mmcblk0.img
+
+
+
+Image source from raspi.debian.net:
+
+https://raspi.debian.net/verified/20210823_raspi_2_bullseye.img.xz
+
+
+
+[MEDIA=youtube]BucRSUBuc50[/MEDIA]
